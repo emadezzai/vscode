@@ -1,0 +1,42 @@
+{
+  "name": "vesper-extended-cursor",
+  "displayName": "Vesper Extended",
+  "publisher": "oreofreakshake",
+  "description": "Remapped Color Schema for Vesper to Support more Language",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/oreofreakshake/vesper-extended"
+  },
+  "homepage": "https://github.com/oreofreakshake/vesper-extended",
+  "bugs": {
+    "url": "https://github.com/oreofreakshake/vesper-extended/issues"
+  },
+  "icon": "icon.png",
+  "version": "1.1.0-cursor.0",
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Themes"
+  ],
+  "keywords": [
+    "vesper",
+    "theme",
+    "dark",
+    "extended"
+  ],
+  "contributes": {
+    "themes": [
+      {
+        "label": "Vesper Extended",
+        "uiTheme": "vs-dark",
+        "path": "./themes/Vesper-extended-color-theme.json"
+      }
+    ]
+  },
+  "volta": {
+    "node": "22.18.0",
+    "npm": "11.5.2"
+  }
+}

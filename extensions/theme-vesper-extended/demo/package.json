@@ -1,0 +1,28 @@
+{
+  "name": "vesper-extended",
+  "displayName": "Vesper Extended",
+  "publisher": "kocean33",
+  "description": "Remapped Color Schema for Vesper to Support more Language",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/KOCEAN33/vesper-extended"
+  },
+  "icon": "icon.png",
+  "version": 12,
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Themes"
+  ],
+  "contributes": {
+    "themes": [
+      {
+        "label": "Vesper Extended",
+        "uiTheme": "vs-dark",
+        "path": "./themes/Vesper-extended-color-theme.json"
+      }
+    ]
+  }
+}

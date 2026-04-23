@@ -29,8 +29,8 @@ suite('WorkbenchThemeService', () => {
 
 		test('returns unknown IDs unchanged', () => {
 			assert.deepStrictEqual(
-				['Dark Modern', 'Dark 2026', 'Some Custom Theme', ''].map(migrateThemeSettingsId),
-				['Dark Modern', 'Dark 2026', 'Some Custom Theme', '']
+				['Dark Modern', 'Vesper Extended', 'Some Custom Theme', ''].map(migrateThemeSettingsId),
+				['Dark Modern', 'Vesper Extended', 'Some Custom Theme', '']
 			);
 		});
 	});
