@@ -156,13 +156,29 @@ function patchExtensionAutoDir(extensionIndex) {
           [role="textbox"],
           [data-testid="assistant-message"],
           [data-testid="user-message"],
+          .messageInput_cKsPxg,
+          .mentionMirror_cKsPxg,
           .root_-a7MRw,
           .userMessage_07S1Yg,
           .pluginDescription_yumWmQ,
           .pluginName_yumWmQ {
             unicode-bidi: plaintext;
+          }
+          .messageInput_cKsPxg,
+          .mentionMirror_cKsPxg {
+            text-align: start;
+          }
+          .messageInput_cKsPxg[dir="rtl"],
+          .mentionMirror_cKsPxg[dir="rtl"] {
+            direction: rtl;
+            text-align: right;
+          }
+          .messageInput_cKsPxg[dir="ltr"],
+          .mentionMirror_cKsPxg[dir="ltr"] {
+            direction: ltr;
+            text-align: left;
           }`;
-  if (content.includes(cssAnchor) && !content.includes('unicode-bidi: plaintext')) {
+  if (content.includes(cssAnchor) && !content.includes('messageInput_cKsPxg[dir="rtl"]')) {
     content = content.replace(cssAnchor, cssPatch);
   }
 
@@ -180,6 +196,8 @@ function patchExtensionAutoDir(extensionIndex) {
               '[role="textbox"]',
               '[data-testid="assistant-message"]',
               '[data-testid="user-message"]',
+              '.messageInput_cKsPxg',
+              '.mentionMirror_cKsPxg',
               'p',
               'li',
               'pre',
@@ -192,13 +210,37 @@ function patchExtensionAutoDir(extensionIndex) {
               'h5',
               'h6'
             ].join(',');
+            const rtlSensitiveSelector = [
+              '.messageInput_cKsPxg',
+              '.mentionMirror_cKsPxg',
+              '[contenteditable="true"][role="textbox"]'
+            ].join(',');
+            const rtlPattern = /[\u0591-\u07FF\uFB1D-\uFDFD\uFE70-\uFEFC]/;
+            const syncDirection = (node) => {
+              if (!(node instanceof Element)) return;
+              const text = ((node.value ?? node.textContent) || '').trim();
+              if (!text) {
+                node.setAttribute('dir', 'auto');
+                return;
+              }
+              node.setAttribute('dir', rtlPattern.test(text) ? 'rtl' : 'ltr');
+            };
             const applyAutoDir = (root = document) => {
               if (root.nodeType !== Node.ELEMENT_NODE && root.nodeType !== Node.DOCUMENT_NODE) return;
               const element = root.nodeType === Node.ELEMENT_NODE ? root : null;
               if (element?.matches?.(selector)) element.setAttribute('dir', 'auto');
               root.querySelectorAll?.(selector).forEach((node) => node.setAttribute('dir', 'auto'));
+              if (element?.matches?.(rtlSensitiveSelector)) syncDirection(element);
+              root.querySelectorAll?.(rtlSensitiveSelector).forEach(syncDirection);
             };
             applyAutoDir();
+            document.addEventListener('input', (event) => {
+              const target = event.target;
+              if (!(target instanceof Element)) return;
+              if (target.matches?.(rtlSensitiveSelector)) syncDirection(target);
+              const container = target.closest?.('.messageInputContainer_cKsPxg, .inputContainer_cKsPxg, .inputWrapper_cKsPxg');
+              container?.querySelectorAll?.(rtlSensitiveSelector).forEach(syncDirection);
+            }, true);
             new MutationObserver((mutations) => {
               for (const mutation of mutations) {
                 for (const node of mutation.addedNodes) applyAutoDir(node);
