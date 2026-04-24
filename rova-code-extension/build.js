@@ -177,6 +177,37 @@ function patchExtensionAutoDir(extensionIndex) {
           .mentionMirror_cKsPxg[dir="ltr"] {
             direction: ltr;
             text-align: left;
+          }
+          [data-testid="assistant-message"],
+          [data-testid="user-message"] {
+            text-align: start;
+          }
+          [data-testid="assistant-message"][dir="rtl"],
+          [data-testid="user-message"][dir="rtl"] {
+            direction: rtl;
+            text-align: right;
+          }
+          [data-testid="assistant-message"][dir="ltr"],
+          [data-testid="user-message"][dir="ltr"] {
+            direction: ltr;
+            text-align: left;
+          }
+          .placeholder_q4zSJA {
+            text-align: start;
+            left: 8px;
+            right: auto;
+          }
+          .placeholder_q4zSJA[dir="rtl"] {
+            direction: rtl;
+            text-align: right;
+            right: 8px;
+            left: auto;
+          }
+          .placeholder_q4zSJA[dir="ltr"] {
+            direction: ltr;
+            text-align: left;
+            left: 8px;
+            right: auto;
           }`;
   if (content.includes(cssAnchor) && !content.includes('messageInput_cKsPxg[dir="rtl"]')) {
     content = content.replace(cssAnchor, cssPatch);
@@ -215,15 +246,30 @@ function patchExtensionAutoDir(extensionIndex) {
               '.mentionMirror_cKsPxg',
               '[contenteditable="true"][role="textbox"]'
             ].join(',');
+            const inputContainerSelector = '.messageInputContainer_cKsPxg, .inputContainer_cKsPxg, .inputWrapper_cKsPxg';
             const rtlPattern = /[\u0591-\u07FF\uFB1D-\uFDFD\uFE70-\uFEFC]/;
+            const syncInputChrome = (node, dir) => {
+              if (!(node instanceof Element)) return;
+              const container = node.closest?.(inputContainerSelector);
+              if (!container) return;
+              const normalizedDir = dir === 'rtl' || dir === 'ltr' ? dir : 'auto';
+              container.querySelectorAll?.('.messageInput_cKsPxg, .mentionMirror_cKsPxg, .placeholder_q4zSJA')
+                .forEach((element) => element.setAttribute('dir', normalizedDir));
+            };
             const syncDirection = (node) => {
               if (!(node instanceof Element)) return;
-              const text = ((node.value ?? node.textContent) || '').trim();
+              const source = node.matches?.('.mentionMirror_cKsPxg')
+                ? (node.closest?.(inputContainerSelector)?.querySelector('.messageInput_cKsPxg') ?? node)
+                : node;
+              const text = ((source.value ?? source.textContent) || '').trim();
               if (!text) {
                 node.setAttribute('dir', 'auto');
+                syncInputChrome(node, 'auto');
                 return;
               }
-              node.setAttribute('dir', rtlPattern.test(text) ? 'rtl' : 'ltr');
+              const dir = rtlPattern.test(text) ? 'rtl' : 'ltr';
+              node.setAttribute('dir', dir);
+              syncInputChrome(node, dir);
             };
             const applyAutoDir = (root = document) => {
               if (root.nodeType !== Node.ELEMENT_NODE && root.nodeType !== Node.DOCUMENT_NODE) return;
@@ -238,8 +284,11 @@ function patchExtensionAutoDir(extensionIndex) {
               const target = event.target;
               if (!(target instanceof Element)) return;
               if (target.matches?.(rtlSensitiveSelector)) syncDirection(target);
-              const container = target.closest?.('.messageInputContainer_cKsPxg, .inputContainer_cKsPxg, .inputWrapper_cKsPxg');
-              container?.querySelectorAll?.(rtlSensitiveSelector).forEach(syncDirection);
+              const container = target.closest?.(inputContainerSelector);
+              if (!container) return;
+              const primaryInput = container.querySelector?.('.messageInput_cKsPxg, [contenteditable="true"][role="textbox"]');
+              if (primaryInput) syncDirection(primaryInput);
+              else container.querySelectorAll?.(rtlSensitiveSelector).forEach(syncDirection);
             }, true);
             new MutationObserver((mutations) => {
               for (const mutation of mutations) {
