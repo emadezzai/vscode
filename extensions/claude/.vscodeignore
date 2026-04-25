@@ -1,0 +1,4 @@
+resources/native-binary/**
+resources/native-binaries/**
+out/resources/native-binary/**
+out/resources/native-binaries/**
