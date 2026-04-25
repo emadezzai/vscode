@@ -21,7 +21,7 @@ echo "Step 2: Creating DMG..."
 mkdir -p out-dmg
 
 # Note: The build output from gulp is placed in the parent directory by default in VS Code's setup
-BUILD_DIR="../VSCode-darwin-x64"
+BUILD_DIR=".."
 OUT_DIR="./out-dmg"
 
 node --experimental-strip-types build/darwin/create-dmg.ts "$BUILD_DIR" "$OUT_DIR"
